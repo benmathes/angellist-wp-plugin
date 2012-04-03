@@ -27,13 +27,11 @@ add_action('admin_head', 'angellist_edit_tools');
 
 function angellist_edit_tools() {
   wp_enqueue_script('angellist_autocomplete_search', plugins_url() . '/angellist-embed/js/autocomplete.js', array('jquery'));
+  wp_enqueue_script('angellist_jquery_ui', plugins_url() . '/angellist-embed/js/jquery-1.7.1.min.js', array('jquery'));
+  wp_enqueue_script('angellist_jquery_ui_custom', plugins_url() . '/angellist-embed/js/jquery-ui-1.8.18.custom.min.js', array('jquery'));
   wp_enqueue_style('angellist_autocomplete_search_styles', plugins_url() . '/angellist-embed/css/autocomplete.css');
   wp_enqueue_style('angellist_autocomplete_search_styles', plugins_url() . '/angellist-embed/css/jquery-ui-1.8.18.custom.css');
-  add_meta_box('angellist_embed_search',
-	       'What Company/Person is this Article About?',
-	       'angellist_edit_autocomplete_box',
-	       'post' 
-	       );
+  add_meta_box('angellist_embed_search','What Company/Person is this Article About?', 'angellist_edit_autocomplete_box', 'post');
 
 }
 

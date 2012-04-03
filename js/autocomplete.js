@@ -7,59 +7,57 @@ jQuery(document).ready(function() {
   var last_char_typed_at;
   var pause_before_search_ms = 1000;
 
+  search_box.autocomplete({
+    source: search,
+    minLength: 3,
+    select: function( event, ui ) {
+      console.log( ui.item ?
+		   "Selected: " + ui.item.label :
+		   "Nothing selected, input was " + this.value);
+    },
+    render: function(a,b,c) { console.log(a,b,c); },
+    open: function() {
+      //$(this).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+    },
+    close: function() {
+      //$(this).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+    }
+  });
 
-  // pretend we're searching immediately
-  // but wait before actually firing off a query until they've stopped typing for a second
-  function try_search(query, position) {
-    render_results({'name': 'searching...'});
-    setTimeout(function() {
-      if ( (new Date()).getTime() - last_char_typed_at >= pause_before_search_ms) {
-	search(query, position);
-      }
-    }, pause_before_search_ms);
-  }
+  // hack to custom render the items
+  search_box.data("autocomplete")._renderItem = function (ul, item) {
+    console.log(ul, item);
+    return jQuery("<li>").data("item.autocomplete", item)
+      .append(jQuery('<img>')
+      .appendTo(ul);
+  };
 
 
   // request from local server's plugin file, which will curl-call out to the
   // angellist API. No cross-site scripting.
-  function search(query, position) {
+  function search(query, results_callback) {
     jQuery.ajax({
       'url': '/wp-content/plugins/angellist-embed/search.php',
-      'data': {'query': query},
+      'data': {'query': query.term},
       'dataType': 'json',
       'method': 'GET',
-      'success': function(results) { render_results(results, position); },
-      'error': function(results) { render_results(results, position); },
+      'success': function(results) { results_callback.apply(this, [results]) },
+      'error': function(results) { results_callback.apply(this, [results]); },
     });
   }
 
   function render_results(results) {
     console.log(results);
-
-    // plugin to tinyMCE and add the 
+    // plugin to tinyMCE and add the markup at the bottom?
   }
-
-
-  function 
 
 
   // clear the input if the default text is in there
   search_box.focus(function() {
-    if ($(this).val() === $(this).attr('start_val')) {
-      $(this).val('');
+    if (jQuery(this).is('.inactive')) {
+      jQuery(this).removeClass('inactive');
+      jQuery(this).val('');
     }
   });
 
-
-  // check on each keypress if the autocomplete search should be added
-  search_box.keyup(function() {
-    last_char_typed_at = (new Date()).getTime();
-    if (search_box.val().length >= min_length) {
-      try_search(serach_box.val());
-    }
-  });
-
-  
-
-
-}
+});
