@@ -1,9 +1,72 @@
-
-.angellist_search {
-
-
+.expand_angellist_preview {
+    display: none;
 }
+.angellist .angellist_preview {
+    display: none;
+}
+.angellist .preview_explanation {
+    display: none;
+}
+.angellist .currently_selected .remove {
+    color: #880000;
+    margin-left: 5px;
+    text-decoration: none;
+}
+.angellist .currently_selected .selected_link {
+    display: inline-block; 
+    background-color: #E0EDF5; 
+    font-size: 12px; 
+    padding: 2px 4px;
+    color: #2F5D92;
+    display: inline-block;
+    text-decoration: none;
+}
+.angellist_search {
+    width: 300px;
+}
+.angellist_search.inactive {
+    color: #aaa;
+}
+.angellist_search.ui-autocomplete-loading {
+    background-repeat: no-repeat;
+    background-position: right;
+    background-image: url('/wp-content/plugins/angellist-embed/images/ajax-loader.gif');
+}
+.angellist_search_result_list_item {
+    margin: 0px;
+}
+.angellist_search_result {
+    display: block;
+    width: 288px;
+    border-radius: 5px;
+    padding: 3px 5px;
+    background-color: #f6f6f6;
+    border-bottom: 1px solid #aaa;
+    border-left: 1px solid #aaa;
+    border-right: 1px solid #aaa;
 
-li.angellist_search_result {
-  padding: 5px;			   
+    cursor: pointer;
+    height: 32px
+}
+.angellist_search_result:hover {
+    background-color: #e4e4e4;
+    color: #21759B;
+}
+.angellist_search_result .img_holder {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #aaa;
+    background-color: #fff;
+    float: left;
+}
+.angellist_search_result img {
+    width: 26px;
+    height: 26px;
+    margin: 2px;
+}
+.angellist_search_result .name {
+    font-size: 14px;
+    display: inline-block;
+    margin-left: 5px;
+    margin-top: 8px;
 }
