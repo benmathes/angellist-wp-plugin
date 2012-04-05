@@ -1,14 +1,4 @@
-<?
-  global $post;
-  $post_id = !empty($post->ID) ? $post->ID : null;
-?>
-
 <div class="angellist">
-  <input type="hidden" 
-	 class="hidden_post_id" 
-	 name="hidden_post_id" 
-	 value="<?= $post_id ?>"
-	 >
   <input type="text" 
 	 name="angellist_embed_search" 
 	 class="angellist_search inactive"
@@ -19,7 +9,9 @@
   <span class="currently_selected"></span>
      
   <a href="javascript:" class="expand_angellist_preview button">
-    show preview <span class="expand_angellist_preview_arrow">►</span>
+    <span class="expand_angellist_button_description">show</span>
+    preview 
+    <span class="expand_angellist_preview_arrow">⇣</span>
   </a>
 
   <div class="preview_explanation">

@@ -28,9 +28,15 @@ Copyright 2012  AngelList  (email : hackers@angel.co)
  */
 add_action('admin_head', 'angellist_edit_tools');
 function angellist_edit_tools() {
-  wp_enqueue_script('angellist_jquery', plugins_url() . '/angellist-embed/js/jquery-1.7.1.min.js');
-  wp_enqueue_script('angellist_jquery_ui_custom', plugins_url() . '/angellist-embed/js/jquery-ui-1.8.18.custom.min.js');
-  wp_enqueue_script('angellist_autocomplete', plugins_url() . '/angellist-embed/js/autocomplete.js');
+  wp_enqueue_script('angellist_jquery', plugins_url() . '/angellist-embed/js/jquery-1.7.1.min.js', null, false, $in_footer = true);
+  wp_enqueue_script('angellist_jquery_ui_custom', plugins_url() . '/angellist-embed/js/jquery-ui-1.8.18.custom.min.js', null, false, $in_footer = true);
+
+  // declare the URL to the file that handles the AJAX request (wp-admin/admin-ajax.php)
+  $autocomplete_script = 'angellist_autocomplete';
+  wp_enqueue_script($autocomplete_script, plugins_url() . '/angellist-embed/js/autocomplete.js', null, false, $in_footer = true);
+  global $post;
+  wp_localize_script($autocomplete_script, 'AngelList_AJAX', array('url' => admin_url('admin-ajax.php'), 'post_id' => $post->ID));
+
   wp_enqueue_style('angellist_autocomplete_search_styles', plugins_url() . '/angellist-embed/css/autocomplete.css');
   wp_enqueue_style('angellist_jquery_ui_search_styles', plugins_url() . '/angellist-embed/css/jquery-ui-1.8.18.custom.css');
   add_meta_box('angellist_embed_search','What Startup or Person is this Article About?', 'angellist_edit_autocomplete_box', 'post');
@@ -39,38 +45,43 @@ function angellist_edit_autocomplete_box() {
   // TODO: if a post has a URL associated, display on page load
   // ideally plugin to JS by firing events?
   include( dirname(__FILE__) . '/views/angellist_search.html');
-
-  echo "<hr>" . get_post_meta($post_id, 'angellist_profile_url', $single = true);
 }
 
 
+
 /**
- * APPEND THE WIDGET ON SAVE
+ * ADD/REMOVE OVER AJAX IN REALTIME AS THE AUTHOR EDITS THE POSTS
+ * WITH CUSTOM ACTIONS THAT JAVASCRIPT PASS INTO /wp-admin/admin-ajax.php
  */
-add_action('save_post', 'angellist_add_widget');
-function angellist_add_widget($post_id) {
-  // check for post_meta
-  $profile_url = get_post_meta($post_id, 'angellist_profile_url');
-  if ($profile_url) {
-    $post = get_post($post_id);
+add_action('wp_ajax_add_angellist_widget_to_post', 'angellist_add_to_post');
+function angellist_add_to_post() {
+  if (!empty($_POST['post_id'])) {
+    update_post_meta($_POST['post_id'], 'angellist_profile_url', $_POST['profile_url']);
+  }
+}
+add_action('wp_ajax_remove_angellist_widget_from_post', 'angellist_remove_from_post');
+function angellist_remove_from_post() {
+  if (!empty($_POST['post_id'])) {
+    delete_post_meta($_POST['post_id'], 'angellist_profile_url');
+  }
+}
 
+/**
+ * INCLUDE JS THAT WILL RENDER THE ANGELLIST WIDGET IF THE POST HAS ONE ATTACHED
+ */
+add_action('wp_head', 'load_widget_if_post_has_it');
+function load_widget_if_post_has_it() {
+  global $post;
+  $profile_url = get_post_meta($post->ID, 'angellist_profile_url', $single = true);
+  if (!empty($profile_url)) {
+    wp_enqueue_script('angellist_load_the_embed_widget', "${profile_url}/embed/pandodaily.js", array('jquery'), false, $in_footer = true);
     // look for previous embed widget in the post body:
-    $pattern_start = "<!-- BEGIN ANGELLIST EMBED WIDGET -->";
-    $pattern_end = "<!-- END ANGELLIST EMBED WIDGET -->";
-    $embed_code = "<div id='angellist_embed'></div><script src='${$profile_url}/embed/pandodaily.js' type='text/javascript'></script>";
-    if (preg_match("/${pattern_start}.*${pattern_end}/", $post->post_content)) {
-      preg_replace("/${$pattern_start}.*${$pattern_end}/$pattern_start $embed_code $pattern_end/", $post->post_content);
+    // important for performance that this does NOT call update_post on each page load.
+    $embed_code = "<div id='angellist_embed'></div>";
+    if (FALSE === strpos($post->post_content, $embed_code)) {
+      $post->post_content .= $embed_code;
+      wp_update_post($post);
     }
-    else {
-      $post['post_content'] .= "$pattern_start $embed_code $pattern_end";
-    }
-
-    // unhook this function so it doesn't loop infinitely
-    remove_action('save_post', 'angellist_add_widget');
-    // update the post, which calls save_post again
-    wp_update_post($post);
-    // re-hook this function
-    add_action('save_post', 'angellist_add_widget');
   }
 }
 
