@@ -40,8 +40,7 @@ function angellist_edit_autocomplete_box() {
   // ideally plugin to JS by firing events?
   include( dirname(__FILE__) . '/views/angellist_search.html');
 
-  $profile_url = get_post_meta($post_id, 'angellist_profile_url', $single = true);
-  echo "<hr><pre>$profile_url</pre></hr>";
+  echo "<hr>" . get_post_meta($post_id, 'angellist_profile_url', $single = true);
 }
 
 
@@ -59,8 +58,8 @@ function angellist_add_widget($post_id) {
     $pattern_start = "<!-- BEGIN ANGELLIST EMBED WIDGET -->";
     $pattern_end = "<!-- END ANGELLIST EMBED WIDGET -->";
     $embed_code = "<div id='angellist_embed'></div><script src='${$profile_url}/embed/pandodaily.js' type='text/javascript'></script>";
-    if (preg_match("/${$pattern_start}.*${$pattern_end}/", $post['post_content'])) {
-      preg_replace("/${$pattern_start}.*${$pattern_end}/$pattern_start $embed_code $pattern_end/", $post['post_content']);
+    if (preg_match("/${pattern_start}.*${pattern_end}/", $post->post_content)) {
+      preg_replace("/${$pattern_start}.*${$pattern_end}/$pattern_start $embed_code $pattern_end/", $post->post_content);
     }
     else {
       $post['post_content'] .= "$pattern_start $embed_code $pattern_end";
