@@ -1,7 +1,12 @@
+<?
+  global $post;
+  $angellist_profile = get_post_meta($post->ID, 'angellist_profile', $single = true);
+?>
+
 <div class="angellist">
 
-  <? if (!empty($profile_url)) : ?>
-    <input type="hidden" name="angellist_profile_url" value="<?= $profile_url ?>">
+  <? if (!empty($angellist_profile)) : ?>
+    <input type="hidden" name="angellist_profile" value='<?= htmlspecialchars(json_encode($angellist_profile)) ?>'>
   <? endif; ?>
 
   <input type="text" 

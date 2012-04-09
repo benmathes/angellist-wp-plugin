@@ -12,12 +12,12 @@ jQuery(document).ready(function() {
     var preview_explanation = jQuery('.angellist .preview_explanation');
     var expand_angellist_button_description = jQuery('.angellist .expand_angellist_button_description');
 
-    // 
-    var prefill_profile_url = jQuery('.angellist input[name="angellist_profile_url"]');
-    if (prefill_profile_url) {
-
+    // if we have profile, pre-fill it
+    var prefill_profile = jQuery('.angellist input[name="angellist_profile"]');
+    if (prefill_profile.length > 0) {
+      prefill_profile = jQuery.parseJSON(prefill_profile.val()); // it's json_encode()'d 
+      select_result(prefill_profile, true);
     }
-
 
     expand_preview_button.click(toggle_preview);
 
@@ -26,15 +26,15 @@ jQuery(document).ready(function() {
       'minLength': 3,
       'autoFocus': true,
       'select': function(event, ui) {
-	select_result(ui.item);
+        select_result(ui.item);
       }
     });
 
     // clear the input if the default text is in there
     search_box.focus(function() {
       if (jQuery(this).is('.inactive')) {
-	jQuery(this).removeClass('inactive');
-	jQuery(this).val('');
+        jQuery(this).removeClass('inactive');
+        jQuery(this).val('');
       }
     });
 
@@ -54,41 +54,39 @@ jQuery(document).ready(function() {
     // angellist API. No cross-site scripting.
     function search(query, results_callback) {
       jQuery.ajax({
-	'url': '/wp-content/plugins/angellist-embed/search.php',
-	'data': {'query': query.term},
-	'dataType': 'json',
-	'type': 'GET',
-	'success': results_callback,
-	'error': results_callback
+        'url': '/wp-content/plugins/angellist-embed/search.php',
+        'data': {'query': query.term},
+        'dataType': 'json',
+        'type': 'GET',
+        'success': results_callback,
+        'error': results_callback
       });
     }
 
 
-    function select_result(result) {
+    function select_result(result, prefill) {
       // link to view profile in new window. 
-      // x to remove the item.
+      // and an 'x' to remove the item.
       var selected_link = jQuery('<a>').attr({
-	'class': 'selected_link',
-	'target': '_blank',
-	'href': result.url,
-	'title': 'open AngelList profile in a new window ⇗'
+        'class': 'selected_link',
+        'target': '_blank',
+        'href': result.url,
+        'title': 'open AngelList profile in a new window ⇗'
       });
       selected_link.html(result.name);
       var remove_x = jQuery('<a>').attr({
-	'class': 'remove',
-	'href': 'javascript:',
-	'title': 'remove from this post',
+        'class': 'remove',
+        'href': 'javascript:',
+        'title': 'remove from this post',
       }).text('x');
       remove_x.click(remove_selected_result)
       selected_link.append(remove_x);
       currently_selected.empty().append(selected_link);
       load_preview(result.url)
-      add_to_post(result);
 
-
-      // plug into tinyMCE and append the markup? 
-      // will have to search/replace the entire content for it,
-      // but that might not be too bad...
+      if (!prefill) {
+        add_to_post(result);
+      }
     }
 
     function load_preview(slug_url) {
@@ -98,18 +96,18 @@ jQuery(document).ready(function() {
 
     function toggle_preview(force) {
       if (preview.is('.expanded') || force == 'hide') {
-	preview.removeClass('expanded');
-	preview.slideUp();
-	preview_explanation.fadeOut();
-	expand_angellist_button_description.text('show');
-	arrow.text('⇣');
+        preview.removeClass('expanded');
+        preview.slideUp();
+        preview_explanation.fadeOut();
+        expand_angellist_button_description.text('show');
+        arrow.text('⇣');
       }
       else if (!preview.is('.expanded') || force == 'show') {
-	preview.addClass('expanded');
-	preview.slideDown();
-	preview_explanation.fadeIn();
-	expand_angellist_button_description.text('hide');
-	arrow.text('⇡');      
+        preview.addClass('expanded');
+        preview.slideDown();
+        preview_explanation.fadeIn();
+        expand_angellist_button_description.text('hide');
+        arrow.text('⇡');      
       }
     }
 
@@ -120,33 +118,32 @@ jQuery(document).ready(function() {
       remove_from_post();
     }
 
-    function add_to_post(profile_url) {
+    function add_to_post(profile) {
       jQuery.ajax({
-	'url': AngelList_AJAX.url,
-	'data': {
-	  'profile_url': profile_url, 
-	  'post_id': AngelList_AJAX.post_id, 
-	  'action': 'add_angellist_widget_to_post' 
-	},
-	'dataType': 'json',
-	'type': 'POST',
-	'success': function() {},
-	'error': function() {}
+        'url': AngelList_AJAX.url,
+        'data': {
+          'angellist_profile': profile, 
+          'post_id': AngelList_AJAX.post_id, 
+          'action': 'add_angellist_widget_to_post' 
+        },
+        'dataType': 'json',
+        'type': 'POST',
+        'success': function() {},
+        'error': function() {}
       });
     }
 
-    function remove_from_post(profile_url) {
+    function remove_from_post(profile) {
       jQuery.ajax({
-	'url': AngelList_AJAX.url,
-	'data': {
-	  'profile_url': profile_url, 
-	  'post_id': AngelList_AJAX.post_id, 
-	  'action': 'remove_angellist_widget_from_post' 
-	},
-	'dataType': 'json',
-	'type': 'POST',
-	'success': function() {},
-	'error': function() {}
+        'url': AngelList_AJAX.url,
+        'data': {
+          'post_id': AngelList_AJAX.post_id, 
+          'action': 'remove_angellist_widget_from_post' 
+        },
+        'dataType': 'json',
+        'type': 'POST',
+        'success': function() {},
+        'error': function() {}
       });
     }
   });

@@ -45,11 +45,6 @@ function angellist_edit_tools() {
   add_meta_box('angellist_embed_search','What Startup or Person is this Article About?', 'angellist_edit_autocomplete_box', 'post');
 }
 function angellist_edit_autocomplete_box() {
-  // TODO: if a post has a URL associated, display on page load
-  // ideally plugin to JS by firing events?
-  global $post;
-  $angellist_profile = get_post_meta($post->ID, 'angellist_profile', $single = true);
-  var_dump($angellist_profile);
   include( dirname(__FILE__) . '/views/angellist_search.php');
 }
 
@@ -80,14 +75,20 @@ function angellist_remove_from_post() {
 add_action('wp_head', 'load_widget_if_post_has_it');
 function load_widget_if_post_has_it() {
   global $post;
-  $angellist_profile = get_post_meta($post->ID, 'angellist_profile', $single = true);
-  if (!empty($angellist_profile)) {
-    // look for previous embed widget in the post body to remain idempotent.
-    $embed_code = "<div id='angellist_embed'></div>";
-    if (FALSE === strpos($post->post_content, $embed_code)) {
-      wp_enqueue_script('angellist_load_the_embed_widget', "${angellist_profile}/embed/pandodaily.js", array('jquery'), false, $in_footer = true);
-      $post->post_content .= $embed_code;
-      wp_update_post($post);
+  if (!empty($post)) {
+    $angellist_profile = get_post_meta($post->ID, 'angellist_profile', $single = true);
+    if (!empty($angellist_profile)) {
+
+      // always queue up the JS that will load in the widget
+      wp_enqueue_script('angellist_load_the_embed_widget', "${angellist_profile['url']}/embed/pandodaily.js", array('jquery'), false, $in_footer = true);
+
+      // before editing the post, first look for previous embed
+      // widget in the post body to remain idempotent.
+      $embed_code = "<div id='angellist_embed'></div>";
+      if (FALSE === strpos($post->post_content, $embed_code)) {
+        $post->post_content .= $embed_code;
+        wp_update_post($post);
+      }
     }
   }
 }
@@ -102,13 +103,26 @@ function load_widget_if_post_has_it() {
 add_action('publish_post', 'angellist_publish_notify');
 function angellist_publish_notify($post_id) {
   $angellist_profile = get_post_meta($post_id, 'angellist_profile', $single = true);
-  if ($angellist_profile) {
-    $post = get_post($post_id);
-    // TODO: DON'T COMMIT. CHANGE TO ANGEL.CO. ALSO USE STRUCTURED NOW.
-    $ping_url = "https://localhost:3000/embed/post_published/?=" . urlencode($profile_url) . "&perma_link=" . urlencode(get_permalink($post_id));
+  $already_notified = get_post_meta($post_id, 'angellist_entity_notified', $single = true);
+  if ($angellist_profile && !$already_notified) {
+    ob_start();
+
+    // TODO: DON'T COMMIT. CHANGE TO ANGEL.CO.
+    $ping_url = "http://angel.co/embed/post_published/?"
+      . "type="        . urlencode($angellist_profile['type']) 
+      . "&name="       . urlencode($angellist_profile['name'])
+      . "&id="         . urlencode($angellist_profile['id'])
+      . "&url="        . urlencode($angellist_profile['url'])
+      . "&perma_link=" . urlencode(get_permalink($post_id));
+
     $curl_handle = curl_init($ping_url);
     $results = curl_exec($curl_handle);
     $response = curl_getinfo($curl_handle);
     curl_close($curl_handle);
+
+    // mark that we notified AL.    
+    update_post_meta($post_id, 'angellist_entity_notified', true);
+    // don't need the output.
+    ob_end_clean(); 
   }
 }

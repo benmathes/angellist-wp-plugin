@@ -65,8 +65,11 @@
     margin: 2px;
 }
 .angellist_search_result .name {
-    font-size: 14px;
     display: inline-block;
+    font-size: 14px;
+    height: 19px;
     margin-left: 5px;
     margin-top: 8px;
+    overflow: hidden;
+    width: 250px;
 }
