@@ -1,4 +1,9 @@
 <div class="angellist">
+
+  <? if (!empty($profile_url)) : ?>
+    <input type="hidden" name="angellist_profile_url" value="<?= $profile_url ?>">
+  <? endif; ?>
+
   <input type="text" 
 	 name="angellist_embed_search" 
 	 class="angellist_search inactive"

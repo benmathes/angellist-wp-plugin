@@ -2,7 +2,7 @@ jQuery(document).ready(function() {
   // namespace everything so we don't clash with other WP plugins
   var search_box = jQuery('.angellist .angellist_search');
 
-  // only run when the stuff is included.
+  // only run when the AngelList embed builder is included.
   search_box.each(function() {
     var currently_selected = jQuery('.angellist .currently_selected');
     var preview = jQuery('.angellist .angellist_preview');
@@ -11,6 +11,13 @@ jQuery(document).ready(function() {
     var expand_preview_button = jQuery('.angellist .expand_angellist_preview');
     var preview_explanation = jQuery('.angellist .preview_explanation');
     var expand_angellist_button_description = jQuery('.angellist .expand_angellist_button_description');
+
+    // 
+    var prefill_profile_url = jQuery('.angellist input[name="angellist_profile_url"]');
+    if (prefill_profile_url) {
+
+    }
+
 
     expand_preview_button.click(toggle_preview);
 
@@ -76,7 +83,7 @@ jQuery(document).ready(function() {
       selected_link.append(remove_x);
       currently_selected.empty().append(selected_link);
       load_preview(result.url)
-      add_to_post(result.url);
+      add_to_post(result);
 
 
       // plug into tinyMCE and append the markup? 
