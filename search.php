@@ -3,7 +3,7 @@ ob_start();
 
 $results = array();
 if (!empty($_GET['query'])) {
-  $angellist_api_search = "http://angel.co/1/search?type=User,Startup&query=" . urlencode($_GET['query']);
+  $angellist_api_search = "http://api.angel.co/1/search?type=User,Startup&query=" . urlencode($_GET['query']);
   $ch = curl_init($angellist_api_search);
   curl_exec($ch);
   $results = ob_get_contents();
@@ -17,4 +17,4 @@ if (!empty($_GET['query'])) {
 }
 ob_end_clean();
 
-echo ($results);
+echo($results);
