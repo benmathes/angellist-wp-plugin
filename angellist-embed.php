@@ -107,7 +107,6 @@ function angellist_publish_notify($post_id) {
   if ($angellist_profile && !$already_notified) {
     ob_start();
 
-    // TODO: DON'T COMMIT. CHANGE TO ANGEL.CO.
     $ping_url = "http://angel.co/embed/post_published/?"
       . "type="        . urlencode($angellist_profile['type']) 
       . "&name="       . urlencode($angellist_profile['name'])
